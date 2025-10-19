@@ -30,7 +30,24 @@ def main():
             FAZER A BUSCA DE UM ARTISTA AQUI
             pelo que eu entendi, basta pegar a URI do artista no spotify
             e usar o método artist() da biblioteca spotipy para buscar os dados e printar no terminal
+
+            Exemplo abaixo:
         '''
+
+        artist_uri = 'spotify:artist:2yNNYQBChuox9A5Ka93BIn'
+        print(f"\nBuscando dados para o artista URI: {artist_uri} ...")
+
+        artist_data = sp.artist(artist_uri)
+
+        print("\n--- DADOS DO ARTISTA OBTIDOS ---")
+        pprint(artist_data)
+        print("----------------------------------")
+
+        print(f"\nNome: {artist_data['name']}")
+        print(f"Gêneros: {artist_data['genres']}")
+        print(f"Seguidores: {artist_data['followers']['total']}")
+
+        print("\nTarefa da Semana 1 (Script de Autenticação e Coleta) concluída com sucesso.")
 
     except spotipy.SpotifyException as e:
         print(f"Erro durante a chamada da API do Spotify: {e}")
