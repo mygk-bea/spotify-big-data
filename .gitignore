@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Arquivo de Segredos
+.env
+
+# Metadados de IDE
+.idea/
+.vscode/
