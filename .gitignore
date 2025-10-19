@@ -10,3 +10,5 @@ venv/
 # Metadados de IDE
 .idea/
 .vscode/
+
+.cache
