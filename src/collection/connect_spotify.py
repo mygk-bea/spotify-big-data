@@ -26,26 +26,39 @@ def main():
         sp = spotipy.Spotify(auth_manager=auth_manager)
         print("Autenticação com a API do Spotify realizada com sucesso!")
 
-        '''
-            FAZER A BUSCA DE UM ARTISTA AQUI
-            pelo que eu entendi, basta pegar a URI do artista no spotify
-            e usar o método artist() da biblioteca spotipy para buscar os dados e printar no terminal
+        # exemplo demonstrando a captura de dados de um artista
+        taylor_uri = 'spotify:artist:06HL4z0CvFAxyc27GXpf02'
+        taylor_data = sp.artist(taylor_uri)
 
-            Exemplo abaixo:
-        '''
+        # exemplo demonstrando a captura de dados de albuns
+        red_uri = 'spotify:album:6kZ42qRrzov54LcAk4onW9'
+        # simplificando para pegar somente do market do Brasil
+        red_data = sp.album(red_uri, market="BR")
 
-        artist_uri = 'spotify:artist:2yNNYQBChuox9A5Ka93BIn'
-        print(f"\nBuscando dados para o artista URI: {artist_uri} ...")
-
-        artist_data = sp.artist(artist_uri)
-
-        print("\n--- DADOS DO ARTISTA OBTIDOS ---")
-        pprint(artist_data)
+        print("\n--- DADOS BRUTOS DA TAYLOR SWIFT ---")
+        print(taylor_data)
         print("----------------------------------")
 
-        print(f"\nNome: {artist_data['name']}")
-        print(f"Gêneros: {artist_data['genres']}")
-        print(f"Seguidores: {artist_data['followers']['total']}")
+        print("--- DADOS SELECIONADOS DA TAYLOR SWIFT ---")
+        # dados importantes requisitados pelo Termo de Abertura
+        print(f"ID: {taylor_data['id']}")
+        print(f"Nome: {taylor_data['name']}")
+        print(f"Seguidores: {taylor_data['followers']['total']}")
+        print(f"Popularidade: {taylor_data['popularity']}")
+        # o campo de gêneros da Taylor é vazio mesmo, foi verificado
+        print(f"Gêneros: {taylor_data['genres']}")
+        print("----------------------------------")
+
+        print("--- DADOS SELECIONADOS DO ALBUM RED ---")
+
+        # verificação do recebimento de dados
+        # print(red_data)
+
+        # dados importantes requisitados pelo Termo de Abertura
+        print(f"ID: {red_data['id']}")
+        print(f"Título: {red_data['name']}")
+        print(f"Tipo de álbum: {red_data['album_type']}")
+        print(f"Data de lançamento: {red_data['release_date']}")
 
         print("\nTarefa da Semana 1 (Script de Autenticação e Coleta) concluída com sucesso.")
 
