@@ -3,69 +3,92 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import os
 from dotenv import load_dotenv
 from pprint import pprint
-import sys
 
-def main():
-    # Carregar as variáveis de ambiente do arquivo .env
+# --- DADOS DO TERMO DE ABERTURA ---
+ARTIST_URIs_TO_FETCH = {
+    "Taylor Swift": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
+    "Dua Lipa": "spotify:artist:6M2wZ9GZgrQXHCFfjv46we",
+    "Imagine Dragons": "spotify:artist:53XhwfbYqKCa1cC15pYq2q",
+    "Arctic Monkeys": "spotify:artist:7Ln80lUS6He07XvHI8qqHH",
+    "Kendrick Lamar": "spotify:artist:2YZyLoL8N0Wb9xBt1NhZWg",
+    "Drake": "spotify:artist:3TVXtAsR1Inumwj472S9r4",
+    "Anitta": "spotify:artist:7FNnA9vBm6EKceENgCGRMb",
+    "Jão": "spotify:artist:59FrDXDVJz0EKqYg39dnT2",
+    "Calvin Harris": "spotify:artist:7CajNmpbOovFoOoasH2HaY",
+    "David Guetta": "spotify:artist:1Cs0zKBU1kc0i8ypK3B9ai"
+}
+# -----------------------------------
+
+def get_spotify_client():
     load_dotenv()
-
     CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
     CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET")
 
-    if not CLIENT_ID or not CLIENT_SECRET:
-        print("Erro: Credenciais 'SPOTIPY_CLIENT_ID' ou 'SPOTIPY_CLIENT_SECRET' não encontradas.")
-        print("Por favor, crie um arquivo .env na raiz do projeto e adicione suas credenciais.")
-        sys.exit(1)
+    auth_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+    token = auth_manager.get_access_token(as_dict=False)
+    print(f"Token obtido com sucesso: {token[:20]}...")
 
-    print("Credenciais carregadas com sucesso.")
+    sp = spotipy.Spotify(auth=token)
+    return sp
 
+def collect_artist_data(sp, artist_uri):
     try:
-        auth_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+        print(f"   Buscando dados do artista... (URI: {artist_uri})")
+        artist_info = sp.artist(artist_uri)
 
-        # Instância do cliente Spotify
-        sp = spotipy.Spotify(auth_manager=auth_manager)
-        print("Autenticação com a API do Spotify realizada com sucesso!")
+        print("   Buscando top faixas...")
+        top_tracks = sp.artist_top_tracks(artist_uri, country="BR")
+        track_ids = [track['id'] for track in top_tracks['tracks']]
 
-        # exemplo demonstrando a captura de dados de um artista
-        taylor_uri = 'spotify:artist:06HL4z0CvFAxyc27GXpf02'
-        taylor_data = sp.artist(taylor_uri)
+        # print("   Buscando 'audio features' das top faixas...")
+        # audio_features = []
+        # if track_ids:
+        #     audio_features = sp.audio_features(tracks=track_ids)
 
-        # exemplo demonstrando a captura de dados de albuns
-        red_uri = 'spotify:album:6kZ42qRrzov54LcAk4onW9'
-        # simplificando para pegar somente do market do Brasil
-        red_data = sp.album(red_uri, market="BR")
+        print("   Buscando álbuns...")
+        albums_response = sp.artist_albums(artist_uri, album_type='album', country="BR", limit=2)
 
-        print("\n--- DADOS BRUTOS DA TAYLOR SWIFT ---")
-        print(taylor_data)
-        print("----------------------------------")
+        # print("   Buscando artistas relacionados...")
+        # related_artists = sp.artist_related_artists(artist_uri)
 
-        print("--- DADOS SELECIONADOS DA TAYLOR SWIFT ---")
-        # dados importantes requisitados pelo Termo de Abertura
-        print(f"ID: {taylor_data['id']}")
-        print(f"Nome: {taylor_data['name']}")
-        print(f"Seguidores: {taylor_data['followers']['total']}")
-        print(f"Popularidade: {taylor_data['popularity']}")
-        # o campo de gêneros da Taylor é vazio mesmo, foi verificado
-        print(f"Gêneros: {taylor_data['genres']}")
-        print("----------------------------------")
+        artist_full_data = {
+            "artist_info": artist_info,
+            "top_tracks": top_tracks,
+            "audio_features": None,
+            "albums": albums_response,
+            "related_artists": None
+        }
 
-        print("--- DADOS SELECIONADOS DO ALBUM RED ---")
-
-        # verificação do recebimento de dados
-        # print(red_data)
-
-        # dados importantes requisitados pelo Termo de Abertura
-        print(f"ID: {red_data['id']}")
-        print(f"Título: {red_data['name']}")
-        print(f"Tipo de álbum: {red_data['album_type']}")
-        print(f"Data de lançamento: {red_data['release_date']}")
-
-        print("\nTarefa da Semana 1 (Script de Autenticação e Coleta) concluída com sucesso.")
+        print(f"   Coleta para {artist_info['name']} concluída.")
+        return artist_full_data
 
     except spotipy.SpotifyException as e:
         print(f"Erro durante a chamada da API do Spotify: {e}")
+        return None
     except Exception as e:
-        print(f"Ocorreu um erro inesperado: {e}")
+        print(f"Ocorreu um erro inesperado na coleta: {e}")
+        return None
+
+def main():
+    sp = get_spotify_client()
+    all_collected_data = []
+
+    print("\n--- INICIANDO COLETA EM LARGA ESCALA (SEMANA 2) ---")
+    for artist_name, artist_uri in ARTIST_URIs_TO_FETCH.items():
+        print(f"\nColetando dados para: {artist_name}...")
+        
+        data = collect_artist_data(sp, artist_uri)
+        
+        if data:
+            all_collected_data.append(data)
+
+            print(f"\n--- JSON BRUTO COLETADO PARA: {artist_name} ---")
+            # Mandar JSON para o MongoDB ex: 'collection.insert_one(data)'
+            pprint(data)
+            print("--------------------------------------------------")
+
+    print("\n--- COLETA EM LARGA ESCALA CONCLUÍDA ---")
+    print(f"Total de {len(all_collected_data)} artistas processados com sucesso.")
 
 if __name__ == "__main__":
     main()
