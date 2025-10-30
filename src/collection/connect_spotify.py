@@ -3,6 +3,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import os
 from dotenv import load_dotenv
 from pprint import pprint
+from pymongo import MongoClient
 
 # --- DADOS DO TERMO DE ABERTURA ---
 ARTIST_URIs_TO_FETCH = {
@@ -69,9 +70,24 @@ def collect_artist_data(sp, artist_uri):
         print(f"Ocorreu um erro inesperado na coleta: {e}")
         return None
 
+def get_mongo_collection():
+    load_dotenv() # Carregas as credenciais do mongo
+    # Atribui as credenciais a variáveis
+    MONGO_URI = os.getenv("MONGODB_URI")
+    MONGO_DB = os.getenv("MONGODB_DB")
+    MONGO_COLLECTION = os.getenv("MONGODB_COLLECTION")
+
+    # Cria o cliente, seleciona o banco e coleção
+    client = MongoClient(MONGO_URI) 
+    db = client[MONGO_DB]
+    collection = db[MONGO_COLLECTION]
+    print(f"Conectado ao MongoDB: {MONGO_DB}.{MONGO_COLLECTION}")
+    return collection # Retorna a coleção, onde os dados serão gravados
+
 def main():
     sp = get_spotify_client()
     all_collected_data = []
+    collection = get_mongo_collection() # Chama a função get_mongo_collection
 
     print("\n--- INICIANDO COLETA EM LARGA ESCALA (SEMANA 2) ---")
     for artist_name, artist_uri in ARTIST_URIs_TO_FETCH.items():
@@ -83,7 +99,10 @@ def main():
             all_collected_data.append(data)
 
             print(f"\n--- JSON BRUTO COLETADO PARA: {artist_name} ---")
-            # Mandar JSON para o MongoDB ex: 'collection.insert_one(data)'
+            # Manda JSON para o MongoDB 
+            collection.insert_one(data)
+            print(f"   → Dados de {artist_name} inseridos com sucesso no MongoDB.")
+
             pprint(data)
             print("--------------------------------------------------")
 
