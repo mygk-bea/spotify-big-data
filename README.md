@@ -74,7 +74,61 @@ spotify-big-data-main/
 
 <br>
 
-## 🗃️ 5. Esquema do Banco NoSQL (MongoDB)
+## 🐍 5. Scripts de Coleta (Python)
+
+O script `src/collection/connect_spotify.py` é responsável pela coleta de dados.
+
+### Autenticação
+
+Utiliza o `spotipy` para autenticação:
+
+```python
+from spotipy.oauth2 import SpotifyClientCredentials
+import os
+import spotipy
+
+credentials = SpotifyClientCredentials(
+    client_id=os.getenv("SPOTIFY_CLIENT_ID"),
+    client_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
+)
+sp = spotipy.Spotify(client_credentials_manager=credentials)
+```
+
+### Conexão e Inserção no MongoDB
+
+```python
+from pymongo import MongoClient
+
+    MONGO_URI = os.getenv("MONGODB_URI")
+    MONGO_DB = os.getenv("MONGODB_DB")
+    MONGO_COLLECTION = os.getenv("MONGODB_COLLECTION")
+
+    client = MongoClient(MONGO_URI) 
+    db = client[MONGO_DB]
+    collection = db[MONGO_COLLECTION]
+
+# ... coleta de dados ...
+
+# Inserção no MongoDB
+collection.insert_one(data)
+```
+
+### Coleta por Artista
+
+A coleta é realizada para uma lista pré-definida de artistas:
+
+```python
+ARTIST_URIs_TO_FETCH = {
+    "Taylor Swift": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
+    "Dua Lipa": "spotify:artist:6M2wZ9GZgrQXHCFfjv46we",
+    "Imagine Dragons": "spotify:artist:53XhwfbYqKCa1cC15pYq2q",
+    # ... outros artistas ...
+}
+```
+
+<br>
+
+## 🗃️ 6. Esquema do Banco NoSQL (MongoDB)
 
 O documento armazenado na **Raw Zone** do MongoDB segue uma estrutura aninhada, conforme o exemplo abaixo:
 
@@ -101,55 +155,6 @@ O documento armazenado na **Raw Zone** do MongoDB segue uma estrutura aninhada, 
         ]
       }
   ],
-}
-```
-
-<br>
-
-## 🐍 6. Scripts de Coleta (Python)
-
-O script `src/collection/connect_spotify.py` é responsável pela coleta de dados.
-
-### Autenticação
-
-Utiliza o `spotipy` para autenticação:
-
-```python
-from spotipy.oauth2 import SpotifyClientCredentials
-import os
-import spotipy
-
-credentials = SpotifyClientCredentials(
-    client_id=os.getenv("SPOTIFY_CLIENT_ID"),
-    client_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
-)
-sp = spotipy.Spotify(client_credentials_manager=credentials)
-```
-
-### Conexão e Inserção no MongoDB
-
-```python
-from pymongo import MongoClient
-
-mongo_client = MongoClient(os.getenv("MONGODB_URI"))
-collection = mongo_client["spotify"]["raw_data"]
-
-# ... coleta de dados ...
-
-# Inserção no MongoDB
-collection.insert_one(data)
-```
-
-### Coleta por Artista
-
-A coleta é realizada para uma lista pré-definida de artistas:
-
-```python
-ARTIST_URIs_TO_FETCH = {
-    "Taylor Swift": "spotify:artist:06HL4z0CvFAxyc27GXpf02",
-    "Dua Lipa": "spotify:artist:6M2wZ9GZgrQXHCFfjv46we",
-    "Imagine Dragons": "spotify:artist:53XhwfbYqKCa1cC15pYq2q",
-    # ... outros artistas ...
 }
 ```
 
