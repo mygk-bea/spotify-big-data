@@ -27,15 +27,23 @@ graph TD
 
 <br>
 
-## 🔐 3. Obtenção das Credenciais da API Spotify
+## 🔐 3. Obtenção das Credenciais (API Spotify e MongoDB)
 
-### Passo 1 — Criar App
+### Passo 1 — Criar App (Spotify)
 
 1.  Acesse o [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
 2.  Clique em "Create App".
 3.  Copie o `CLIENT_ID` e o `CLIENT_SECRET`.
 
-### Passo 2 — Configurar `.env`
+### Passo 2 - Criar Collection (MongoDB)
+1. Acesse o [MongoDB](https://www.mongodb.com/).
+2. Selecione seu Cluster.
+3. Crie ou Acesse um Database.
+4. Crie uma nova Collection.
+5. Clique em "Conectar" e Selecione a Primeira Opção.
+6. Copie o `MONGODB_URI`, `MONGODB_DATABASE`,`MONGODB_COLLECTION`.
+
+### Passo 3 — Configurar `.env`
 
 Crie um arquivo `.env` e preencha com suas credenciais:
 
@@ -43,8 +51,8 @@ Crie um arquivo `.env` e preencha com suas credenciais:
 SPOTIFY_CLIENT_ID=SEU_CLIENT_ID
 SPOTIFY_CLIENT_SECRET=SEU_CLIENT_SECRET
 MONGODB_URI=mongodb://localhost:27017
-MONGO_DB=NOME_DATABASE
-MONGO_COLLECTION=NOME_COLLECTION
+MONGODB_DB=NOME_DATABASE
+MONGODB_COLLECTION=NOME_COLLECTION
 ```
 
 <br>
