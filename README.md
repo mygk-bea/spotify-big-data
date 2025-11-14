@@ -37,7 +37,7 @@ graph TD
 
 ### Passo 2 — Configurar `.env`
 
-Baseado no `.env.example` do projeto anexo, crie um arquivo `.env` e preencha com suas credenciais:
+Crie um arquivo `.env` e preencha com suas credenciais:
 
 ```dotenv
 SPOTIFY_CLIENT_ID=SEU_CLIENT_ID
